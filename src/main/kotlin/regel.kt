@@ -2,17 +2,12 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.Executors
-
+import java.util.*
 
 class Regel : CliktCommand() {
     val model: String by option(help = "Pretrained Model").default("so")
-    val maxIter: Int by option(help = "Maximum Iterations").int().default(5)
     val benchmark = "customize"
 
     val top: Int by option(help = "Top results").int().default(5)
@@ -31,7 +26,7 @@ class Regel : CliktCommand() {
 
     fun interactive() {
         prepareFolder()
-        var output: MutableList<RegexOutput> = mutableListOf()
+        val output: MutableList<String> = mutableListOf()
         try {
             while (true) {
                 println("=======================")
@@ -40,31 +35,51 @@ class Regel : CliktCommand() {
                 if (fileName.isEmpty()) {
                     break
                 }
+                println("Enter the example(Press enter to continue): ")
                 val nl = readLine().toString().trimEnd()
 
-                var examples: MutableList<Pair<String, String>> = mutableListOf()
-                println("Enter examples below")
+                val examples: MutableList<Pair<String, String>> = mutableListOf()
+
                 while (true) {
-                    var ex = readLine().toString().trimEnd()
+                    println("Enter the example(Press enter to continue): ")
+                    val ex = readLine().toString().trimEnd()
                     if (ex.isEmpty()) {
                         break
                     }
-                    var sign = readLine().toString()
+                    println("Enter + for positive and - for negative example: ")
+                    val sign = readLine().toString()
                     examples.add(Pair(ex, sign))
                     // TODO Add caching
                 }
                 println("generating sketches...")
-                //Default 5
-                var sketch: List<String> = parseDescriptions(listOf<String>(nl), model, 25)
-                println(sketch)
+                //Default 25
+                val sketch: List<String> = parseDescriptions(listOf<String>(nl), model, 25)
+                println("Sketches:- \n $sketch")
                 writeBenchmark(fileName, nl, examples)
                 copyBenchmarkToInteractive(fileName)
                 output += testBenchmark(fileName, nl, sketch, examples)
+
+                if (output.size < 5) {
+                    for (i in 0 until output.size) {
+                        println("[${i}].  ${output[i]}")
+                    }
+                } else {
+                    for (i in 0..4) {
+                        println("[${i}].  ${output[i]}")
+                    }
+                    println("Any regex correct? [y/n]")
+                    val response = readLine().toString().trimEnd()
+                    if (response.lowercase(Locale.getDefault()) == "n") {
+                        println("All the outputs:\n")
+                        for (i in 0 until output.size) {
+                            println("[${i}].  ${output[i]}")
+                        }
+                    }
+                }
             }
         } catch (err: Error) {
             writeOutput(output)
         }
-        writeOutput(output)
     }
 
     private fun copyBenchmarkToInteractive(fileName: String) {
@@ -77,8 +92,8 @@ class Regel : CliktCommand() {
     }
 
     private fun writeBenchmark(fileName: String, nl: String, examples: MutableList<Pair<String, String>>) {
-        var bench_path = "exp/customize/benchmark/$fileName"
-        var bench_file = File(bench_path)
+        val bench_path = "exp/customize/benchmark/$fileName"
+        val bench_file = File(bench_path)
         bench_file.writeText("// natural language\n$nl \n\n")
         bench_file.appendText("// example")
         for (ex in examples) {
@@ -88,52 +103,40 @@ class Regel : CliktCommand() {
         bench_file.appendText("// gt\nna")
     }
 
-    private fun writeOutput(output: MutableList<RegexOutput>) {
+    private fun writeOutput(output: MutableList<String>) {
         val outputFile = "$logsPath/rawOutput.csv"
         for (i in output) {
-            File(outputFile).appendText("${i.iter}, ${i.b}, ${i.rank}, \"${i.sketch}\", \"${i.p}\", ${i.cost}, ${i.time}, ${i.gt} ")
+            File(outputFile).appendText("$i\n")
         }
     }
 
-    private fun <String> testBenchmark(
+    private fun testBenchmark(
         fileName: String,
         nl: String,
         sketch: List<String>,
         examples: MutableList<Pair<String, String>>
-    ): Array<RegexOutput> {
+    ): MutableList<String> {
+        val temp = mutableListOf<String>()
+        println("NL: ${nl}")
+        println("Example: \n")
+        for (ex in examples) println(ex)
+        println("Running the synthesizer...")
+        var i = 1;
+        for (sk in sketch) {
 
-            println("NL: ${nl}")
-            println("Example: ${examples[0]}")
-            println("Running the synthesizer...")
-        var i =1;
-        flowOf(sketch).map {
-            val thread =  ResnaxRunner(
+            val res: String = ResnaxRunner(
                 args = listOf(
                     "0",
                     "$example_dir$fileName",
-                    "$logsPath",
-                    it[i].toString(),
+                    logsPath,
+                    sk.toString(),
                     i++.toString(),
                     "1",
                     "0"
                 )
             ).runStr()
-            println(thread)
+            temp.add(res)
         }
-//            sketch.parallelStream().forEach { sk ->
-//                val thread =   ResnaxRunner(
-//                    args = listOf(
-//                        "0",
-//                        "$example_dir$fileName",
-//                        "$logsPath",
-//                        sk.toString(),
-//                        i++.toString(),
-//                        "1",
-//                        "0"
-//                    )
-//                ).runIO()
-//            }
-        val temp: Array<RegexOutput> = arrayOf()
         return temp
     }
 
@@ -171,13 +174,15 @@ class Regel : CliktCommand() {
     private fun String.runCommand(workingDir: File) {
         ProcessBuilder(*split(" ").toTypedArray())
             .directory(workingDir)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
             .redirectError(ProcessBuilder.Redirect.INHERIT)
             .start()
             .waitFor()
     }
 
     override fun run() {
+        "ant -buildfile build.xml clean".runCommand(File("resnax/"))
+        "ant -buildfile build.xml resnax".runCommand(File("resnax/"))
         interactive()
     }
 }
