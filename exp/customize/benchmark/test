@@ -1,0 +1,12 @@
+// natural language
+write a regular expression that only matches strings, no numbers, no special character, just letters from A - Z. 
+
+// example
+peter,+
+ansh,+
+ramon,+
+?ale8,-
+tho<>sdas,-
+
+// gt
+na
