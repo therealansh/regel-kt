@@ -31,23 +31,23 @@ class Regel : CliktCommand() {
             while (true) {
                 println("=======================")
                 println("Enter filename to save progress. Press 'Enter'")
-                val fileName = readLine().toString()
+                val fileName = readLine()!!.toString()
                 if (fileName.isEmpty()) {
                     break
                 }
-                println("Enter the example(Press enter to continue): ")
+                println("Enter the Natural Language(Press enter to continue): ")
                 val nl = readLine().toString().trimEnd()
 
                 val examples: MutableList<Pair<String, String>> = mutableListOf()
 
                 while (true) {
                     println("Enter the example(Press enter to continue): ")
-                    val ex = readLine().toString().trimEnd()
+                    val ex = readLine()!!.toString().trimEnd()
                     if (ex.isEmpty()) {
                         break
                     }
                     println("Enter + for positive and - for negative example: ")
-                    val sign = readLine().toString()
+                    val sign = readLine()!!.toString()
                     examples.add(Pair(ex, sign))
                     // TODO Add caching
                 }
@@ -68,7 +68,7 @@ class Regel : CliktCommand() {
                         println("[${i}].  ${output[i]}")
                     }
                     println("Any regex correct? [y/n]")
-                    val response = readLine().toString().trimEnd()
+                    val response = readLine()!!.toString().trimEnd()
                     if (response.lowercase(Locale.getDefault()) == "n") {
                         println("All the outputs:\n")
                         for (i in 0 until output.size) {

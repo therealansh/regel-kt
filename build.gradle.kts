@@ -32,6 +32,8 @@ tasks.withType(JavaExec::class) {
     standardInput=System.`in`
 }
 
+tasks.withType<Jar> { duplicatesStrategy = DuplicatesStrategy.INHERIT }
+
 application {
     mainClass.set("MainKt")
 }
