@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/resnax/lib/com.microsoft.z3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/resnax/lib/antlr-4.7.1-complete.jar!/" />
+      <root url="jar://$PROJECT_DIR$/resnax/lib/javatuples-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/resnax/lib/automaton.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

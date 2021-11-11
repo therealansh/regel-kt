@@ -1,17 +1,13 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    application
     kotlin("jvm") version "1.5.10"
     java
-    application
 }
 
 group = "me.parallels"
 version = "1.0-SNAPSHOT"
-
-ant.importBuild("resnax/build.xml"){ antTargetName ->
-    "a-" + antTargetName
-}
 
 repositories {
     mavenCentral()
@@ -30,6 +26,10 @@ tasks.test {
 
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.withType(JavaExec::class) {
+    standardInput=System.`in`
 }
 
 application {

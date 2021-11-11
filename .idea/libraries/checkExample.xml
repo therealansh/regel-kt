@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="checkExample">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/resnax/jars/checkExample.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
