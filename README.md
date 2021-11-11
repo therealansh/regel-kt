@@ -40,6 +40,7 @@ To build SEMPRE follow these steps:
 3. Resnax runs on shorter examples.
 
 ## Results
+![results.png](./results/result1.png)
 
 ## References
 1. ["Multi-modal Synthesis of Regular Expressions"](https://arxiv.org/abs/1908.03316).
