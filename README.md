@@ -12,11 +12,8 @@ Before Running the CLI make sure that following dependencies are installed.
 
 To build SEMPRE follow these steps:
 ```shell
-  cd sempre
-  ./pull-dependencies core
-  ./pull-dependencies corenlp
-  ./pull-dependencies freebase
-  ./pull-dependencies tables
+  chmod +x dependencies.sh
+  ./dependencies.sh
 ```
 
 ## Running REGEL-kt
